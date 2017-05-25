@@ -1,0 +1,34 @@
+(require '[clojure.core.reducers :as r])
+
+
+(defstruct Event :start :end)
+
+(def testcase1 (seq [(struct Event 1 3) (struct Event 2 3) (struct Event 1 4)]))
+(def testcase2 (seq [(struct Event 1 9) (struct Event 10 13) (struct Event 10 24)]))
+(def testcase3 (seq [(struct Event 0 1) (struct Event 1 2) (struct Event  2 3)]))
+
+(defn getoverlap [events]
+  (if (empty? (rest events))
+    '()
+    (do(def head (first events))
+       (def tail (rest events))
+       (def start_1 (get head :start))
+       (def end_1 (get head :end))
+
+       (def overlap (reduce (fn [y x]
+                              (def start_2 (get x :start))
+                              (def end_2 (get x :end))
+                              (if (or (or (and (> start_1 start_2) (< start_1 end_2))
+                                          (and (> end_1 start_2) (< end_1 end_2)))
+                                      (or (and (> start_2 start_1) (< start_2 end_1))
+                                          (and (> end_2 start_1) (< end_2 end_1))))
+
+                                (cons (seq ["overlapping" head x]) y)
+                                )) '() tail))
+       (concat overlap (getoverlap  tail))
+       )
+    ))
+    
+(println (getoverlap testcase1))
+(println (getoverlap testcase2))
+(println (getoverlap testcase3))
